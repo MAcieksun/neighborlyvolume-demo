@@ -85,7 +85,6 @@
             display: block;
         }
 
-        /* Shared styles */
         .card {
             background: rgba(255,255,255,0.1);
             border-radius: 16px;
@@ -154,7 +153,6 @@
             border-color: #1DB954;
         }
 
-        /* Owner Dashboard Styles */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -523,7 +521,7 @@
                     </div>
                     <div class="activity-item">
                         <div class="activity-time">23:41</div>
-                        <div>❤️ Anna z 11B: "Lubię tę muzykę!"</div>
+                        <div>❤️ Anna z 11B: "miłość mieszka w małych gestach ☕"</div>
                     </div>
                     <div class="activity-item">
                         <div class="activity-time">23:38</div>
@@ -561,13 +559,15 @@
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎵 NeighborlyVolume starting...');
             initializeVolumeControls();
             startSongRotation();
             showNotification('🎵 NeighborlyVolume Demo załadowane!');
         });
 
-        // View switching
+        // View switching - NAPRAWIONE!
         function switchView(view) {
+            console.log('Switching to view:', view);
             appState.currentView = view;
             
             // Update buttons
@@ -589,10 +589,12 @@
         function initializeVolumeControls() {
             const neighborSlider = document.getElementById('volume-slider-neighbor');
             
-            neighborSlider.addEventListener('input', function() {
-                const newVolume = parseInt(this.value);
-                updateVolume(newVolume, 'Mieszkanie 12A');
-            });
+            if (neighborSlider) {
+                neighborSlider.addEventListener('input', function() {
+                    const newVolume = parseInt(this.value);
+                    updateVolume(newVolume, 'Mieszkanie 12A');
+                });
+            }
             
             updateVolumeDisplays();
         }
@@ -630,10 +632,23 @@
             const volume = appState.volume;
             
             // Update all volume displays
-            document.getElementById('volume-display-neighbor').textContent = volume + '%';
-            document.getElementById('volume-display-owner').textContent = volume + '%';
-            document.getElementById('current-volume-owner').textContent = volume + '%';
-            document.getElementById('volume-slider-neighbor').value = volume;
+            const elements = [
+                'volume-display-neighbor',
+                'volume-display-owner', 
+                'current-volume-owner'
+            ];
+            
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = volume + '%';
+                }
+            });
+            
+            const slider = document.getElementById('volume-slider-neighbor');
+            if (slider) {
+                slider.value = volume;
+            }
             
             // Color coding
             let color = '#1DB954';
@@ -642,58 +657,30 @@
             else if (volume <= 70) color = '#FFC107';
             else color = '#FF5722';
             
-            document.getElementById('volume-display-neighbor').style.color = color;
-            document.getElementById('volume-display-owner').style.color = color;
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.color = color;
+                }
+            });
         }
 
         function updateStats() {
-            document.getElementById('volume-changes-count').textContent = appState.volumeChanges;
-            document.getElementById('messages-count').textContent = appState.messages;
-            document.getElementById('connected-count').textContent = appState.connectedUsers;
-        }
-
-        // Neighbor actions
-        function neighborAction(action) {
-            switch(action) {
-                case 'mute':
-                    updateVolume(0, 'Mieszkanie 12A');
-                    break;
-                case 'moderate':
-                    updateVolume(25, 'Mieszkanie 12A');
-                    break;
-                case 'reset':
-                    updateVolume(65, 'Mieszkanie 12A');
-                    break;
-                case 'thanks':
-                    appState.messages++;
-                    updateStats();
-                    const poeticThanks = generateOwnerThanks();
-                    addActivity(`❤️ Mieszkanie 12A: "${poeticThanks}"`);
-                    showNotification('❤️ Poetyckie podziękowanie wysłane!');
-                    updateNeighborStatus(`❤️ "${poeticThanks}" - wysłane`);
-                    break;
+            const statElements = {
+                'volume-changes-count': appState.volumeChanges,
+                'messages-count': appState.messages,
+                'connected-count': appState.connectedUsers
+            };
+            
+            for (const [id, value] of Object.entries(statElements)) {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = value;
+                }
             }
         }
 
-        function sendEmojiFromNeighbor(emoji, message) {
-            appState.messages++;
-            updateStats();
-            
-            // Generate poetic thank you message
-            const poeticMessage = generatePoeticThanks(emoji, message);
-            
-            addActivity(`${emoji} Mieszkanie 12A: "${poeticMessage}"`);
-            showNotification(`${emoji} ${message}`);
-            updateNeighborStatus(`${emoji} Wiadomość "${poeticMessage}" wysłana`);
-            
-            // Animate emoji button
-            event.target.style.transform = 'scale(1.2) rotate(15deg)';
-            setTimeout(() => {
-                event.target.style.transform = 'scale(1) rotate(0deg)';
-            }, 200);
-        }
-
-        // Poetic thanks generator
+        // Poetic thanks generator - NAPRAWIONE!
         function generatePoeticThanks(emoji, originalMessage) {
             const poeticMessages = {
                 '👍': [
@@ -745,13 +732,80 @@
             
             return randomMessage;
         }
-            document.getElementById('neighbor-status').innerHTML = 
-                `<span class="connection-indicator"></span>${message}`;
+
+        // Owner thanks generator
+        function generateOwnerThanks() {
+            const ownerThanks = [
+                "jak morze uspokaja fale, tak ty moje głośniki 🌊 ☕",
+                "słodka harmonia między nami jak kawka o poranku ☀️",
+                "w rytmie serca i muzyki - dziękuję za cierpliwość 💙",
+                "poezja to ty, melodia to ja, razem tworzymy symfonię 🎵",
+                "miłość sąsiedzka piękniejsza niż każda ballada 💕",
+                "cisza ma swoją muzykę, a ty jesteś jej dyrygentem 🎭",
+                "jak wiatr przez pola - delikatnie, mądrze, pięknie 🌿",
+                "w małych gestach wielka dobroć mieszka ✨",
+                "harmonie przeplatają się jak nici w swetrze babci 🧶",
+                "muzyka łączy serca, a ty łączysz domy 🏠 💝"
+            ];
             
-            setTimeout(() => {
-                document.getElementById('neighbor-status').innerHTML = 
-                    '<span class="connection-indicator"></span>Połączono z systemem sąsiada • Wszystko działa prawidłowo';
-            }, 5000);
+            return ownerThanks[Math.floor(Math.random() * ownerThanks.length)];
+        }
+
+        // Neighbor actions - NAPRAWIONE!
+        function neighborAction(action) {
+            console.log('Neighbor action:', action);
+            
+            switch(action) {
+                case 'mute':
+                    updateVolume(0, 'Mieszkanie 12A');
+                    break;
+                case 'moderate':
+                    updateVolume(25, 'Mieszkanie 12A');
+                    break;
+                case 'reset':
+                    updateVolume(65, 'Mieszkanie 12A');
+                    break;
+                case 'thanks':
+                    appState.messages++;
+                    updateStats();
+                    const poeticThanks = generateOwnerThanks();
+                    addActivity(`❤️ Mieszkanie 12A: "${poeticThanks}"`);
+                    showNotification('❤️ Poetyckie podziękowanie wysłane!');
+                    updateNeighborStatus(`❤️ "${poeticThanks}" - wysłane`);
+                    break;
+            }
+        }
+
+        function sendEmojiFromNeighbor(emoji, message) {
+            console.log('Sending emoji:', emoji, message);
+            appState.messages++;
+            updateStats();
+            
+            // Generate poetic thank you message
+            const poeticMessage = generatePoeticThanks(emoji, message);
+            
+            addActivity(`${emoji} Mieszkanie 12A: "${poeticMessage}"`);
+            showNotification(`${emoji} ${message}`);
+            updateNeighborStatus(`${emoji} Wiadomość "${poeticMessage}" wysłana`);
+            
+            // Animate emoji button
+            if (event && event.target) {
+                event.target.style.transform = 'scale(1.2) rotate(15deg)';
+                setTimeout(() => {
+                    event.target.style.transform = 'scale(1) rotate(0deg)';
+                }, 200);
+            }
+        }
+
+        function updateNeighborStatus(message) {
+            const statusElement = document.getElementById('neighbor-status');
+            if (statusElement) {
+                statusElement.innerHTML = `<span class="connection-indicator"></span>${message}`;
+                
+                setTimeout(() => {
+                    statusElement.innerHTML = '<span class="connection-indicator"></span>Połączono z systemem sąsiada • Wszystko działa prawidłowo';
+                }, 5000);
+            }
         }
 
         // Owner actions
@@ -759,30 +813,38 @@
             const linkElement = document.getElementById('generated-link');
             const actionsElement = document.getElementById('link-actions');
             
-            const randomId = Math.random().toString(36).substring(2, 15);
-            const newLink = `https://neighborlyvolume.app/control/${randomId}`;
-            
-            linkElement.textContent = newLink;
-            linkElement.style.display = 'block';
-            actionsElement.style.display = 'block';
-            
-            addActivity('🔗 Wygenerowano nowy link udostępniania');
-            showNotification('🔗 Nowy link wygenerowany!');
+            if (linkElement && actionsElement) {
+                const randomId = Math.random().toString(36).substring(2, 15);
+                const newLink = `https://neighborlyvolume.app/control/${randomId}`;
+                
+                linkElement.textContent = newLink;
+                linkElement.style.display = 'block';
+                actionsElement.style.display = 'block';
+                
+                addActivity('🔗 Wygenerowano nowy link udostępniania');
+                showNotification('🔗 Nowy link wygenerowany!');
+            }
         }
 
         function copyLink() {
-            const link = document.getElementById('generated-link').textContent;
-            navigator.clipboard.writeText(link);
-            showNotification('📋 Link skopiowany do schowka!');
+            const linkElement = document.getElementById('generated-link');
+            if (linkElement) {
+                const link = linkElement.textContent;
+                navigator.clipboard.writeText(link);
+                showNotification('📋 Link skopiowany do schowka!');
+            }
         }
 
         function shareWhatsApp() {
-            const link = document.getElementById('generated-link').textContent;
-            const message = `Hej! Jeśli muzyka przeszkadza, możesz kontrolować głośność: ${link} 🎵`;
-            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-            window.open(whatsappUrl, '_blank');
-            addActivity('💬 Link udostępniony przez WhatsApp');
-            showNotification('💬 Otwarto WhatsApp');
+            const linkElement = document.getElementById('generated-link');
+            if (linkElement) {
+                const link = linkElement.textContent;
+                const message = `Hej! Jeśli muzyka przeszkadza, możesz kontrolować głośność: ${link} 🎵`;
+                const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                window.open(whatsappUrl, '_blank');
+                addActivity('💬 Link udostępniony przez WhatsApp');
+                showNotification('💬 Otwarto WhatsApp');
+            }
         }
 
         function printQR() {
@@ -805,19 +867,21 @@
             const time = now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
             
             const activityFeed = document.getElementById('activity-feed');
-            const newActivity = document.createElement('div');
-            newActivity.className = 'activity-item';
-            newActivity.innerHTML = `
-                <div class="activity-time">${time}</div>
-                <div>${message}</div>
-            `;
-            
-            activityFeed.insertBefore(newActivity, activityFeed.firstChild);
-            
-            // Keep only last 20 activities
-            const activities = activityFeed.querySelectorAll('.activity-item');
-            if (activities.length > 20) {
-                activities[activities.length - 1].remove();
+            if (activityFeed) {
+                const newActivity = document.createElement('div');
+                newActivity.className = 'activity-item';
+                newActivity.innerHTML = `
+                    <div class="activity-time">${time}</div>
+                    <div>${message}</div>
+                `;
+                
+                activityFeed.insertBefore(newActivity, activityFeed.firstChild);
+                
+                // Keep only last 20 activities
+                const activities = activityFeed.querySelectorAll('.activity-item');
+                if (activities.length > 20) {
+                    activities[activities.length - 1].remove();
+                }
             }
         }
 
@@ -827,8 +891,12 @@
                 const randomSong = songs[Math.floor(Math.random() * songs.length)];
                 if (randomSong !== appState.currentSong) {
                     appState.currentSong = randomSong;
-                    document.getElementById('current-song-neighbor').textContent = randomSong;
-                    document.getElementById('current-song-owner').textContent = randomSong;
+                    
+                    const neighborSong = document.getElementById('current-song-neighbor');
+                    const ownerSong = document.getElementById('current-song-owner');
+                    
+                    if (neighborSong) neighborSong.textContent = randomSong;
+                    if (ownerSong) ownerSong.textContent = randomSong;
                     
                     addActivity(`🎵 Teraz gra: ${randomSong}`);
                 }
@@ -838,51 +906,15 @@
         // Notifications
         function showNotification(message) {
             const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.classList.add('show');
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
+            if (notification) {
+                notification.textContent = message;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
         }
-
-        // Simulate random neighbor activity
-        function simulateNeighborActivity() {
-            setInterval(() => {
-                if (Math.random() > 0.92) {
-                    const actions = [
-                        () => {
-                            const newUser = `Mieszkanie ${Math.floor(Math.random() * 20) + 1}${String.fromCharCode(65 + Math.floor(Math.random() * 5))}`;
-                            addActivity(`🏠 ${newUser} dołączył do kontroli`);
-                            appState.connectedUsers++;
-                            updateStats();
-                        },
-                        () => {
-                            const poeticEmojis = [
-                                { emoji: '👍', messages: ['jak morze spokojne ☕', 'słodka harmonia 🌙', 'ciepło serca 💙'] },
-                                { emoji: '❤️', messages: ['miłość w małych gestach 💕', 'serce tańczy 💃', 'muzyka łączy 🎵'] },
-                                { emoji: '🎵', messages: ['melodie jak poezja 🎭', 'rytm serca 💗', 'harmonie przeplatają się 🌺'] },
-                                { emoji: '🔥', messages: ['energia kontrolowana 💫', 'fire vibes z mądrością ⚡', 'jak gwiazda ⭐'] }
-                            ];
-                            const randomPoetic = poeticEmojis[Math.floor(Math.random() * poeticEmojis.length)];
-                            const randomMsg = randomPoetic.messages[Math.floor(Math.random() * randomPoetic.messages.length)];
-                            addActivity(`${randomPoetic.emoji} Anna z 11B: "${randomMsg}"`);
-                            appState.messages++;
-                            updateStats();
-                        }
-                    ];
-                    
-                    const randomAction = actions[Math.floor(Math.random() * actions.length)];
-                    randomAction();
-                }
-            }, 8000);
-        }
-
-        // Start simulation
-        setTimeout(simulateNeighborActivity, 10000);
-        
-        // Start poetic moments
-        setInterval(maybeShowSpecialPoetry, 15000);
 
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
@@ -913,30 +945,6 @@
             if (e.key === '1') switchView('neighbor');
             if (e.key === '2') switchView('owner');
         });
-
-        // Easter egg - special poetic moments
-        function maybeShowSpecialPoetry() {
-            if (Math.random() > 0.95) {
-                const specialMoments = [
-                    "✨ w ciszy słyszę swoją muzykę najpiękniej ✨",
-                    "🌙 noc ma swoje melodie, ty jesteś ich przewodnikiem 🌙",
-                    "☕ jak poranna kawka - ciepło between us ☕",
-                    "🌊 muzyka jak morze, ty jak latarnia morska 🌊",
-                    "💫 w harmonii mieszkamy, w melodiach się spotykamy 💫",
-                    "🎭 życie to teatr, a my gramy najpiękniejszy akt 🎭"
-                ];
-                
-                const randomPoetry = specialMoments[Math.floor(Math.random() * specialMoments.length)];
-                
-                setTimeout(() => {
-                    showNotification(randomPoetry);
-                }, Math.random() * 5000);
-                
-                setTimeout(() => {
-                    addActivity(`🌟 Poetycka chwila: "${randomPoetry}"`);
-                }, Math.random() * 8000);
-            }
-        }
 
         // Show tips
         setTimeout(() => {
