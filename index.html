@@ -3,159 +3,857 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeighborlyVolume Demo</title>
+    <title>NeighborlyVolume - Full Demo</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
     <style>
-        /* Kompletne style wbudowane */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #1DB954 0%, #191414 100%);
             min-height: 100vh;
             color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            overflow-x: hidden;
         }
-        .container { 
-            max-width: 600px; 
-            padding: 40px; 
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
             text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 1s ease-out;
         }
-        .logo { 
-            font-size: 3rem; 
-            margin-bottom: 20px;
-            background: linear-gradient(45deg, #1DB954, #1ed760);
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #1DB954, #1ed760, #ffffff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .volume-control { margin: 40px 0; }
+
+        .view-switcher {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .view-btn {
+            padding: 12px 30px;
+            background: none;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .view-btn.active {
+            background: #1DB954;
+            box-shadow: 0 4px 15px rgba(29, 185, 84, 0.4);
+        }
+
+        .view-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .view-content {
+            display: none;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .view-content.active {
+            display: block;
+        }
+
+        /* Shared styles */
+        .card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .volume-display {
+            font-size: 3.5rem;
+            color: #1DB954;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
+            text-shadow: 0 0 20px rgba(29, 185, 84, 0.5);
+        }
+
         .volume-slider {
             width: 100%;
             height: 12px;
             border-radius: 6px;
             background: rgba(255,255,255,0.2);
             outline: none;
-            margin: 30px 0;
+            margin: 20px 0;
             -webkit-appearance: none;
         }
+
         .volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 30px;
-            height: 30px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
-            background: #1DB954;
+            background: linear-gradient(45deg, #1DB954, #1ed760);
             cursor: pointer;
+            box-shadow: 0 4px 15px rgba(29, 185, 84, 0.4);
+            transition: all 0.3s ease;
         }
+
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
         .btn {
-            background: #1DB954;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border: 2px solid rgba(255,255,255,0.2);
             color: white;
-            padding: 15px 30px;
-            border: none;
+            padding: 12px 20px;
             border-radius: 8px;
             cursor: pointer;
-            margin: 10px;
-            font-size: 16px;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 5px;
         }
-        .btn:hover { background: #1ed760; transform: translateY(-2px); }
-        .volume-display { 
-            font-size: 3rem; 
-            color: #1DB954; 
-            font-weight: bold; 
-            margin: 20px 0; 
+
+        .btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: #1DB954;
+            transform: translateY(-1px);
+        }
+
+        .btn.primary {
+            background: linear-gradient(45deg, #1DB954, #1ed760);
+            border-color: #1DB954;
+        }
+
+        /* Owner Dashboard Styles */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 4px solid #1DB954;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1DB954;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .activity-feed {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+
+        .activity-item {
+            padding: 12px;
+            border-left: 3px solid #1DB954;
+            margin-bottom: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            animation: fadeInLeft 0.5s ease-out;
+        }
+
+        .activity-time {
+            font-size: 0.8rem;
+            opacity: 0.6;
+            margin-bottom: 3px;
+        }
+
+        .connected-users {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .user-badge {
+            background: rgba(29, 185, 84, 0.2);
+            border: 1px solid #1DB954;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-badge.active::before {
+            content: "🟢";
+            font-size: 0.8rem;
+        }
+
+        .link-generator {
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .generated-link {
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin: 10px 0;
+            word-break: break-all;
+            display: none;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .emoji-picker {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .emoji-btn {
+            font-size: 1.8rem;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .emoji-btn:hover {
+            border-color: #1DB954;
+            transform: scale(1.1);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1DB954;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .connection-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #1DB954;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(29, 185, 84, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(29, 185, 84, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(29, 185, 84, 0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .current-track {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            border-left: 4px solid #1DB954;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            .view-switcher {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">🎵 NeighborlyVolume</div>
-        <h2>Sąsiedzka Kontrola Głośności</h2>
-        <p style="margin: 20px 0; opacity: 0.8;">
-            Twój sąsiad udostępnił Ci kontrolę nad głośnością muzyki
-        </p>
+    <div class="notification" id="notification"></div>
 
-        <div class="volume-control">
-            <div class="volume-display" id="volume-display">65%</div>
-            <input type="range" min="0" max="100" value="65" 
-                   class="volume-slider" id="volume-slider">
-            <div style="display: flex; justify-content: space-between; opacity: 0.6;">
-                <span>🔇 Cicho</span>
-                <span>🔊 Głośno</span>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🎵 NeighborlyVolume</div>
+            <p style="opacity: 0.8;">Zobacz jak działa z obu perspektyw</p>
+        </div>
+
+        <div class="view-switcher">
+            <button class="view-btn active" onclick="switchView('neighbor')" id="neighbor-btn">
+                🏠 Widok Sąsiada
+            </button>
+            <button class="view-btn" onclick="switchView('owner')" id="owner-btn">
+                🎛️ Twój Dashboard
+            </button>
+        </div>
+
+        <!-- NEIGHBOR VIEW -->
+        <div id="neighbor-view" class="view-content active">
+            <div class="card">
+                <div class="current-track">
+                    <div class="connection-indicator"></div>
+                    <div style="font-size: 1rem; margin-bottom: 8px;">Obecnie gra u sąsiada:</div>
+                    <div style="font-size: 1.2rem; font-weight: bold; color: #1DB954;" id="current-song-neighbor">
+                        Taco Hemingway - "Café Belga"
+                    </div>
+                </div>
+
+                <div style="text-align: center;">
+                    <h2 style="margin-bottom: 15px;">🎵 Kontrola Głośności</h2>
+                    <p style="opacity: 0.8; margin-bottom: 20px;">
+                        Twój sąsiad udostępnił Ci kontrolę nad głośnością swojej muzyki
+                    </p>
+
+                    <div class="volume-display" id="volume-display-neighbor">65%</div>
+                    <input type="range" min="0" max="100" value="65" 
+                           class="volume-slider" id="volume-slider-neighbor">
+                    <div style="display: flex; justify-content: space-between; opacity: 0.6; margin-top: 10px;">
+                        <span>🔇 Cisza</span>
+                        <span>🔊 Głośno</span>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <button class="btn" onclick="neighborAction('mute')">🤫 Wycisz</button>
+                    <button class="btn" onclick="neighborAction('moderate')">🎵 Umiarkowanie</button>
+                    <button class="btn" onclick="neighborAction('reset')">🔄 Reset</button>
+                    <button class="btn primary" onclick="neighborAction('thanks')">❤️ Dzięki!</button>
+                </div>
+
+                <div style="text-align: center;">
+                    <h4 style="margin-bottom: 15px;">💬 Wyślij Reakcję</h4>
+                    <div class="emoji-picker">
+                        <button class="emoji-btn" onclick="sendEmojiFromNeighbor('👍', 'Dzięki!')" title="Dzięki!">👍</button>
+                        <button class="emoji-btn" onclick="sendEmojiFromNeighbor('🤫', 'Za głośno')" title="Za głośno">🤫</button>
+                        <button class="emoji-btn" onclick="sendEmojiFromNeighbor('❤️', 'Lubię!')" title="Lubię!">❤️</button>
+                        <button class="emoji-btn" onclick="sendEmojiFromNeighbor('🎵', 'Super!')" title="Super!">🎵</button>
+                        <button class="emoji-btn" onclick="sendEmojiFromNeighbor('😴', 'Śpię')" title="Śpię">😴</button>
+                        <button class="emoji-btn" onclick="sendEmojiFromNeighbor('🔥', 'Fire!')" title="Zajebiste!">🔥</button>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; text-align: center;">
+                    <div id="neighbor-status">
+                        <span class="connection-indicator"></span>
+                        Połączono z systemem sąsiada • Wszystko działa prawidłowo
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div>
-            <button class="btn" onclick="muteVolume()">🤫 Wycisz</button>
-            <button class="btn" onclick="moderateVolume()">🎵 Umiarkowanie</button>
-            <button class="btn" onclick="sendFeedback()">👍 Dzięki!</button>
-        </div>
+        <!-- OWNER DASHBOARD -->
+        <div id="owner-view" class="view-content">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="connected-count">2</div>
+                    <div class="stat-label">Podłączeni sąsiedzi</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="volume-changes-count">7</div>
+                    <div class="stat-label">Zmiany głośności</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="messages-count">3</div>
+                    <div class="stat-label">Wiadomości od sąsiadów</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="current-volume-owner">65%</div>
+                    <div class="stat-label">Aktualna głośność</div>
+                </div>
+            </div>
 
-        <div style="margin-top: 40px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 12px;">
-            <h3>🚀 Demo Status</h3>
-            <p id="status">Połączono z muzyką sąsiada</p>
-            <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 10px;">
-                To jest demonstracja. W prawdziwej aplikacji kontrolowałbyś rzeczywiste Spotify.
-            </p>
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h3 style="margin-bottom: 15px;">🎵 Status Odtwarzania</h3>
+                    <div class="current-track">
+                        <div style="font-size: 1rem; margin-bottom: 8px;">Teraz grasz:</div>
+                        <div style="font-size: 1.2rem; font-weight: bold; color: #1DB954;" id="current-song-owner">
+                            Taco Hemingway - "Café Belga"
+                        </div>
+                    </div>
+                    <div class="volume-display" id="volume-display-owner">65%</div>
+                    
+                    <div style="margin-top: 15px;">
+                        <h4>🔗 Udostępnione Linki</h4>
+                        <div class="link-generator">
+                            <button class="btn primary" onclick="generateNewLink()">Wygeneruj Nowy Link</button>
+                            <div class="generated-link" id="generated-link">
+                                https://neighborlyvolume.app/control/abc123def456
+                            </div>
+                            <div style="margin-top: 10px; display: none;" id="link-actions">
+                                <button class="btn" onclick="copyLink()">📋 Kopiuj</button>
+                                <button class="btn" onclick="shareWhatsApp()">💬 WhatsApp</button>
+                                <button class="btn" onclick="printQR()">📱 QR Kod</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 15px;">👥 Podłączeni Sąsiedzi</h3>
+                    <div class="connected-users">
+                        <div class="user-badge active" id="user-1">Mieszkanie 12A</div>
+                        <div class="user-badge active" id="user-2">Anna z 11B</div>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <h4>⚙️ Szybkie Ustawienia</h4>
+                        <div style="margin-top: 10px;">
+                            <button class="btn" onclick="setVolumeLimit(30)">🔇 Max 30%</button>
+                            <button class="btn" onclick="setVolumeLimit(50)">🔉 Max 50%</button>
+                            <button class="btn" onclick="setVolumeLimit(70)">🔊 Max 70%</button>
+                            <button class="btn" onclick="setVolumeLimit(100)">📢 Bez Limitów</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: 15px;">📊 Historia Aktywności</h3>
+                <div class="activity-feed" id="activity-feed">
+                    <div class="activity-item">
+                        <div class="activity-time">23:45</div>
+                        <div>🏠 Anna z 11B dołączyła do kontroli</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">23:43</div>
+                        <div>🔊 Mieszkanie 12A zmieniło głośność z 65% na 45%</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">23:41</div>
+                        <div>❤️ Anna z 11B: "Lubię tę muzykę!"</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">23:38</div>
+                        <div>🔗 Wygenerowano nowy link udostępniania</div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">23:35</div>
+                        <div>🏠 Mieszkanie 12A dołączyło do kontroli</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        const volumeSlider = document.getElementById('volume-slider');
-        const volumeDisplay = document.getElementById('volume-display');
-        const status = document.getElementById('status');
+        // Global state
+        const appState = {
+            currentView: 'neighbor',
+            volume: 65,
+            connectedUsers: 2,
+            volumeChanges: 7,
+            messages: 3,
+            currentSong: 'Taco Hemingway - "Café Belga"',
+            activities: []
+        };
 
-        volumeSlider.addEventListener('input', function() {
-            const value = this.value;
-            volumeDisplay.textContent = value + '%';
-            
-            // Simulate API call
-            status.textContent = `Głośność ustawiona na ${value}% ✅`;
-            
-            // Reset status after 3 seconds
-            setTimeout(() => {
-                status.textContent = 'Połączono z muzyką sąsiada';
-            }, 3000);
+        const songs = [
+            'Taco Hemingway - "Café Belga"',
+            'Dawid Podsiadło - "Małomiasteczkowy"',
+            'Sanah - "Szampan"',
+            'Young Igi - "Rysa na szkle"',
+            'Quebonafide - "Bubbletea"',
+            'Daria Zawiałow - "Malinowy chruśniak"'
+        ];
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeVolumeControls();
+            startSongRotation();
+            showNotification('🎵 NeighborlyVolume Demo załadowane!');
         });
 
-        function muteVolume() {
-            volumeSlider.value = 0;
-            volumeDisplay.textContent = '0%';
-            status.textContent = 'Muzyka wyciszona 🤫';
+        // View switching
+        function switchView(view) {
+            appState.currentView = view;
+            
+            // Update buttons
+            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(view + '-btn').classList.add('active');
+            
+            // Update content
+            document.querySelectorAll('.view-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(view + '-view').classList.add('active');
+            
+            if (view === 'owner') {
+                showNotification('🎛️ Przełączono na widok właściciela');
+            } else {
+                showNotification('🏠 Przełączono na widok sąsiada');
+            }
         }
 
-        function moderateVolume() {
-            volumeSlider.value = 30;
-            volumeDisplay.textContent = '30%';
-            status.textContent = 'Ustawiono umiarkowaną głośność 🎵';
+        // Volume controls initialization
+        function initializeVolumeControls() {
+            const neighborSlider = document.getElementById('volume-slider-neighbor');
+            
+            neighborSlider.addEventListener('input', function() {
+                const newVolume = parseInt(this.value);
+                updateVolume(newVolume, 'Mieszkanie 12A');
+            });
+            
+            updateVolumeDisplays();
         }
 
-        function sendFeedback() {
-            status.textContent = 'Podziękowanie wysłane! 👍';
+        function updateVolume(newVolume, source) {
+            const oldVolume = appState.volume;
+            appState.volume = newVolume;
+            appState.volumeChanges++;
+            
+            updateVolumeDisplays();
+            updateStats();
+            
+            // Add to activity feed
+            addActivity(`🔊 ${source} zmieniło głośność z ${oldVolume}% na ${newVolume}%`);
+            
+            // Show appropriate message
+            let message = '';
+            if (newVolume === 0) {
+                message = '🤫 Muzyka wyciszona przez sąsiada';
+            } else if (newVolume <= 20) {
+                message = `🔉 Bardzo cicha głośność (${newVolume}%)`;
+            } else if (newVolume <= 50) {
+                message = `🎵 Umiarkowana głośność (${newVolume}%)`;
+            } else if (newVolume <= 80) {
+                message = `🔊 Średnia głośność (${newVolume}%)`;
+            } else {
+                message = `📢 Głośna muzyka (${newVolume}%)`;
+            }
+            
+            showNotification(message);
+            updateNeighborStatus(message);
+        }
+
+        function updateVolumeDisplays() {
+            const volume = appState.volume;
+            
+            // Update all volume displays
+            document.getElementById('volume-display-neighbor').textContent = volume + '%';
+            document.getElementById('volume-display-owner').textContent = volume + '%';
+            document.getElementById('current-volume-owner').textContent = volume + '%';
+            document.getElementById('volume-slider-neighbor').value = volume;
+            
+            // Color coding
+            let color = '#1DB954';
+            if (volume === 0) color = '#666';
+            else if (volume <= 30) color = '#1DB954';
+            else if (volume <= 70) color = '#FFC107';
+            else color = '#FF5722';
+            
+            document.getElementById('volume-display-neighbor').style.color = color;
+            document.getElementById('volume-display-owner').style.color = color;
+        }
+
+        function updateStats() {
+            document.getElementById('volume-changes-count').textContent = appState.volumeChanges;
+            document.getElementById('messages-count').textContent = appState.messages;
+            document.getElementById('connected-count').textContent = appState.connectedUsers;
+        }
+
+        // Neighbor actions
+        function neighborAction(action) {
+            switch(action) {
+                case 'mute':
+                    updateVolume(0, 'Mieszkanie 12A');
+                    break;
+                case 'moderate':
+                    updateVolume(25, 'Mieszkanie 12A');
+                    break;
+                case 'reset':
+                    updateVolume(65, 'Mieszkanie 12A');
+                    break;
+                case 'thanks':
+                    appState.messages++;
+                    updateStats();
+                    addActivity('❤️ Mieszkanie 12A: "Dzięki za możliwość kontroli!"');
+                    showNotification('❤️ Podziękowanie wysłane!');
+                    updateNeighborStatus('❤️ Podziękowanie wysłane do sąsiada');
+                    break;
+            }
+        }
+
+        function sendEmojiFromNeighbor(emoji, message) {
+            appState.messages++;
+            updateStats();
+            addActivity(`${emoji} Mieszkanie 12A: "${message}"`);
+            showNotification(`${emoji} ${message}`);
+            updateNeighborStatus(`${emoji} Wiadomość "${message}" wysłana`);
+            
+            // Animate emoji button
+            event.target.style.transform = 'scale(1.2) rotate(15deg)';
             setTimeout(() => {
-                status.textContent = 'Połączono z muzyką sąsiada';
+                event.target.style.transform = 'scale(1) rotate(0deg)';
+            }, 200);
+        }
+
+        function updateNeighborStatus(message) {
+            document.getElementById('neighbor-status').innerHTML = 
+                `<span class="connection-indicator"></span>${message}`;
+            
+            setTimeout(() => {
+                document.getElementById('neighbor-status').innerHTML = 
+                    '<span class="connection-indicator"></span>Połączono z systemem sąsiada • Wszystko działa prawidłowo';
+            }, 5000);
+        }
+
+        // Owner actions
+        function generateNewLink() {
+            const linkElement = document.getElementById('generated-link');
+            const actionsElement = document.getElementById('link-actions');
+            
+            const randomId = Math.random().toString(36).substring(2, 15);
+            const newLink = `https://neighborlyvolume.app/control/${randomId}`;
+            
+            linkElement.textContent = newLink;
+            linkElement.style.display = 'block';
+            actionsElement.style.display = 'block';
+            
+            addActivity('🔗 Wygenerowano nowy link udostępniania');
+            showNotification('🔗 Nowy link wygenerowany!');
+        }
+
+        function copyLink() {
+            const link = document.getElementById('generated-link').textContent;
+            navigator.clipboard.writeText(link);
+            showNotification('📋 Link skopiowany do schowka!');
+        }
+
+        function shareWhatsApp() {
+            const link = document.getElementById('generated-link').textContent;
+            const message = `Hej! Jeśli muzyka przeszkadza, możesz kontrolować głośność: ${link} 🎵`;
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+            addActivity('💬 Link udostępniony przez WhatsApp');
+            showNotification('💬 Otwarto WhatsApp');
+        }
+
+        function printQR() {
+            showNotification('📱 QR kod wygenerowany! (w pełnej wersji)');
+            addActivity('📱 Wygenerowano QR kod');
+        }
+
+        function setVolumeLimit(limit) {
+            addActivity(`⚙️ Ustawiono limit głośności na ${limit}%`);
+            showNotification(`⚙️ Limit głośności: ${limit}%`);
+            
+            if (appState.volume > limit) {
+                updateVolume(limit, 'System (limit)');
+            }
+        }
+
+        // Activity feed
+        function addActivity(message) {
+            const now = new Date();
+            const time = now.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+            
+            const activityFeed = document.getElementById('activity-feed');
+            const newActivity = document.createElement('div');
+            newActivity.className = 'activity-item';
+            newActivity.innerHTML = `
+                <div class="activity-time">${time}</div>
+                <div>${message}</div>
+            `;
+            
+            activityFeed.insertBefore(newActivity, activityFeed.firstChild);
+            
+            // Keep only last 20 activities
+            const activities = activityFeed.querySelectorAll('.activity-item');
+            if (activities.length > 20) {
+                activities[activities.length - 1].remove();
+            }
+        }
+
+        // Song rotation
+        function startSongRotation() {
+            setInterval(() => {
+                const randomSong = songs[Math.floor(Math.random() * songs.length)];
+                if (randomSong !== appState.currentSong) {
+                    appState.currentSong = randomSong;
+                    document.getElementById('current-song-neighbor').textContent = randomSong;
+                    document.getElementById('current-song-owner').textContent = randomSong;
+                    
+                    addActivity(`🎵 Teraz gra: ${randomSong}`);
+                }
+            }, 20000);
+        }
+
+        // Notifications
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
             }, 3000);
         }
 
-        // Add some dynamic effects
-        setInterval(() => {
-            if (status.textContent === 'Połączono z muzyką sąsiada') {
-                const songs = [
-                    'Taco Hemingway - "Café Belga"',
-                    'Dawid Podsiadło - "Małomiasteczkowy"', 
-                    'Sanah - "Szampan"',
-                    'Young Igi - "Rysa na szkle"'
-                ];
-                const randomSong = songs[Math.floor(Math.random() * songs.length)];
-                status.textContent = `🎵 Gra: ${randomSong}`;
-                
-                setTimeout(() => {
-                    status.textContent = 'Połączono z muzyką sąsiada';
-                }, 5000);
+        // Simulate random neighbor activity
+        function simulateNeighborActivity() {
+            setInterval(() => {
+                if (Math.random() > 0.92) {
+                    const actions = [
+                        () => {
+                            const newUser = `Mieszkanie ${Math.floor(Math.random() * 20) + 1}${String.fromCharCode(65 + Math.floor(Math.random() * 5))}`;
+                            addActivity(`🏠 ${newUser} dołączył do kontroli`);
+                            appState.connectedUsers++;
+                            updateStats();
+                        },
+                        () => {
+                            const emojis = ['👍', '❤️', '🎵', '🔥'];
+                            const messages = ['Dzięki!', 'Lubię!', 'Super!', 'Zajebiste!'];
+                            const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+                            const message = messages[Math.floor(Math.random() * messages.length)];
+                            addActivity(`${emoji} Anna z 11B: "${message}"`);
+                            appState.messages++;
+                            updateStats();
+                        }
+                    ];
+                    
+                    const randomAction = actions[Math.floor(Math.random() * actions.length)];
+                    randomAction();
+                }
+            }, 8000);
+        }
+
+        // Start simulation
+        setTimeout(simulateNeighborActivity, 10000);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (appState.currentView === 'neighbor') {
+                switch(e.key) {
+                    case 'm':
+                    case 'M':
+                        neighborAction('mute');
+                        break;
+                    case 'r':
+                    case 'R':
+                        neighborAction('reset');
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        const newVolumeUp = Math.min(100, appState.volume + 5);
+                        updateVolume(newVolumeUp, 'Mieszkanie 12A (klawiatura)');
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        const newVolumeDown = Math.max(0, appState.volume - 5);
+                        updateVolume(newVolumeDown, 'Mieszkanie 12A (klawiatura)');
+                        break;
+                }
             }
-        }, 10000);
+            
+            // View switching
+            if (e.key === '1') switchView('neighbor');
+            if (e.key === '2') switchView('owner');
+        });
+
+        // Show tips
+        setTimeout(() => {
+            showNotification('💡 Tip: Przełączaj widoki przyciskami na górze!');
+        }, 5000);
+
+        setTimeout(() => {
+            showNotification('⌨️ Klawiszem 1 = Sąsiad, 2 = Właściciel');
+        }, 12000);
     </script>
 </body>
 </html>
