@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeighborlyVolume Demo</title>
+    <style>
+        /* Kompletne style wbudowane */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1DB954 0%, #191414 100%);
+            min-height: 100vh;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container { 
+            max-width: 600px; 
+            padding: 40px; 
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+        .logo { 
+            font-size: 3rem; 
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #1DB954, #1ed760);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .volume-control { margin: 40px 0; }
+        .volume-slider {
+            width: 100%;
+            height: 12px;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.2);
+            outline: none;
+            margin: 30px 0;
+            -webkit-appearance: none;
+        }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #1DB954;
+            cursor: pointer;
+        }
+        .btn {
+            background: #1DB954;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .btn:hover { background: #1ed760; transform: translateY(-2px); }
+        .volume-display { 
+            font-size: 3rem; 
+            color: #1DB954; 
+            font-weight: bold; 
+            margin: 20px 0; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🎵 NeighborlyVolume</div>
+        <h2>Sąsiedzka Kontrola Głośności</h2>
+        <p style="margin: 20px 0; opacity: 0.8;">
+            Twój sąsiad udostępnił Ci kontrolę nad głośnością muzyki
+        </p>
+
+        <div class="volume-control">
+            <div class="volume-display" id="volume-display">65%</div>
+            <input type="range" min="0" max="100" value="65" 
+                   class="volume-slider" id="volume-slider">
+            <div style="display: flex; justify-content: space-between; opacity: 0.6;">
+                <span>🔇 Cicho</span>
+                <span>🔊 Głośno</span>
+            </div>
+        </div>
+
+        <div>
+            <button class="btn" onclick="muteVolume()">🤫 Wycisz</button>
+            <button class="btn" onclick="moderateVolume()">🎵 Umiarkowanie</button>
+            <button class="btn" onclick="sendFeedback()">👍 Dzięki!</button>
+        </div>
+
+        <div style="margin-top: 40px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 12px;">
+            <h3>🚀 Demo Status</h3>
+            <p id="status">Połączono z muzyką sąsiada</p>
+            <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 10px;">
+                To jest demonstracja. W prawdziwej aplikacji kontrolowałbyś rzeczywiste Spotify.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const volumeSlider = document.getElementById('volume-slider');
+        const volumeDisplay = document.getElementById('volume-display');
+        const status = document.getElementById('status');
+
+        volumeSlider.addEventListener('input', function() {
+            const value = this.value;
+            volumeDisplay.textContent = value + '%';
+            
+            // Simulate API call
+            status.textContent = `Głośność ustawiona na ${value}% ✅`;
+            
+            // Reset status after 3 seconds
+            setTimeout(() => {
+                status.textContent = 'Połączono z muzyką sąsiada';
+            }, 3000);
+        });
+
+        function muteVolume() {
+            volumeSlider.value = 0;
+            volumeDisplay.textContent = '0%';
+            status.textContent = 'Muzyka wyciszona 🤫';
+        }
+
+        function moderateVolume() {
+            volumeSlider.value = 30;
+            volumeDisplay.textContent = '30%';
+            status.textContent = 'Ustawiono umiarkowaną głośność 🎵';
+        }
+
+        function sendFeedback() {
+            status.textContent = 'Podziękowanie wysłane! 👍';
+            setTimeout(() => {
+                status.textContent = 'Połączono z muzyką sąsiada';
+            }, 3000);
+        }
+
+        // Add some dynamic effects
+        setInterval(() => {
+            if (status.textContent === 'Połączono z muzyką sąsiada') {
+                const songs = [
+                    'Taco Hemingway - "Café Belga"',
+                    'Dawid Podsiadło - "Małomiasteczkowy"', 
+                    'Sanah - "Szampan"',
+                    'Young Igi - "Rysa na szkle"'
+                ];
+                const randomSong = songs[Math.floor(Math.random() * songs.length)];
+                status.textContent = `🎵 Gra: ${randomSong}`;
+                
+                setTimeout(() => {
+                    status.textContent = 'Połączono z muzyką sąsiada';
+                }, 5000);
+            }
+        }, 10000);
+    </script>
+</body>
+</html>
