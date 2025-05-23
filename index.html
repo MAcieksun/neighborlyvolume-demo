@@ -414,11 +414,16 @@
                     <button class="btn" onclick="neighborAction('mute')">🤫 Wycisz</button>
                     <button class="btn" onclick="neighborAction('moderate')">🎵 Umiarkowanie</button>
                     <button class="btn" onclick="neighborAction('reset')">🔄 Reset</button>
-                    <button class="btn primary" onclick="neighborAction('thanks')">❤️ Dzięki!</button>
+                    <button class="btn primary" onclick="neighborAction('thanks')">
+                        ❤️ Poetyckie Dzięki
+                    </button>
                 </div>
 
                 <div style="text-align: center;">
-                    <h4 style="margin-bottom: 15px;">💬 Wyślij Reakcję</h4>
+                    <h4 style="margin-bottom: 15px;">💬 Wyślij Poetyczną Reakcję</h4>
+                    <p style="font-size: 0.9rem; opacity: 0.7; margin-bottom: 15px;">
+                        ✨ inspirowane stylem Natalii Przybysz i innych poetów ✨
+                    </p>
                     <div class="emoji-picker">
                         <button class="emoji-btn" onclick="sendEmojiFromNeighbor('👍', 'Dzięki!')" title="Dzięki!">👍</button>
                         <button class="emoji-btn" onclick="sendEmojiFromNeighbor('🤫', 'Za głośno')" title="Za głośno">🤫</button>
@@ -662,9 +667,10 @@
                 case 'thanks':
                     appState.messages++;
                     updateStats();
-                    addActivity('❤️ Mieszkanie 12A: "Dzięki za możliwość kontroli!"');
-                    showNotification('❤️ Podziękowanie wysłane!');
-                    updateNeighborStatus('❤️ Podziękowanie wysłane do sąsiada');
+                    const poeticThanks = generateOwnerThanks();
+                    addActivity(`❤️ Mieszkanie 12A: "${poeticThanks}"`);
+                    showNotification('❤️ Poetyckie podziękowanie wysłane!');
+                    updateNeighborStatus(`❤️ "${poeticThanks}" - wysłane`);
                     break;
             }
         }
@@ -672,9 +678,13 @@
         function sendEmojiFromNeighbor(emoji, message) {
             appState.messages++;
             updateStats();
-            addActivity(`${emoji} Mieszkanie 12A: "${message}"`);
+            
+            // Generate poetic thank you message
+            const poeticMessage = generatePoeticThanks(emoji, message);
+            
+            addActivity(`${emoji} Mieszkanie 12A: "${poeticMessage}"`);
             showNotification(`${emoji} ${message}`);
-            updateNeighborStatus(`${emoji} Wiadomość "${message}" wysłana`);
+            updateNeighborStatus(`${emoji} Wiadomość "${poeticMessage}" wysłana`);
             
             // Animate emoji button
             event.target.style.transform = 'scale(1.2) rotate(15deg)';
@@ -683,7 +693,58 @@
             }, 200);
         }
 
-        function updateNeighborStatus(message) {
+        // Poetic thanks generator
+        function generatePoeticThanks(emoji, originalMessage) {
+            const poeticMessages = {
+                '👍': [
+                    "jak morze spokojne, gdy muzyka cichnie ☕",
+                    "słodka cisza w serca rytmie 🌙",
+                    "dzięki za ten miły gest, jak ranek łagodny ☀️",
+                    "harmonia mieszka między nami 🕊️",
+                    "twoja dobroć jak ciepła herbatka 🍃"
+                ],
+                '🤫': [
+                    "cisza jest złotem, a ty anioł dobrego sąsiedztwa 👼",
+                    "jak szept wiatru przez okno - dziękuję 🌿",
+                    "nocny spokój wraca do nas ✨",
+                    "w ciszy odnajduję serce 💙",
+                    "cichość jak delikatna poezja 📖"
+                ],
+                '❤️': [
+                    "serce tańczy do melodii dobroci 💃",
+                    "miłość mieszka w małych gestach ☕",
+                    "jak słodka kawka o poranku - ciepło 🌅",
+                    "muzyka łączy, a ty łączysz nas jeszcze bardziej 🎵",
+                    "love is in the air, and in the volume control 💕"
+                ],
+                '🎵': [
+                    "melodie płyną jak rzeka, ty ich kapitanem 🚢",
+                    "muzyka jest językiem duszy, kontrola - poezją 🎭",
+                    "w rytmie serca i bitów - dziękuję 💗",
+                    "harmonie przeplatają się z harmonią sąsiedzką 🎼",
+                    "każda nuta ma teraz swoje miejsce 🌺"
+                ],
+                '😴': [
+                    "sen przychodzi jak łagodna fala 🌊",
+                    "w objęciach ciszy znajdę sny 🌙",
+                    "morpheus czeka, a ty mu pomagasz ✨",
+                    "noc będzie słodka jak poezja 📜",
+                    "spokój nocny wraca do domu 🏠"
+                ],
+                '🔥': [
+                    "ta muzyka jak ogień w sercu, ale teraz w sam raz 🔥",
+                    "energia kontrolowana to poezja w ruchu 💫",
+                    "fire vibes z mądrością - idealne połączenie ⚡",
+                    "płomień artysty, serce sąsiada 🎨",
+                    "jak gwiazda - świeci, ale nie oślepia ⭐"
+                ]
+            };
+
+            const messages = poeticMessages[emoji] || ["dziękuję pięknie 💝"];
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            
+            return randomMessage;
+        }
             document.getElementById('neighbor-status').innerHTML = 
                 `<span class="connection-indicator"></span>${message}`;
             
@@ -797,11 +858,15 @@
                             updateStats();
                         },
                         () => {
-                            const emojis = ['👍', '❤️', '🎵', '🔥'];
-                            const messages = ['Dzięki!', 'Lubię!', 'Super!', 'Zajebiste!'];
-                            const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-                            const message = messages[Math.floor(Math.random() * messages.length)];
-                            addActivity(`${emoji} Anna z 11B: "${message}"`);
+                            const poeticEmojis = [
+                                { emoji: '👍', messages: ['jak morze spokojne ☕', 'słodka harmonia 🌙', 'ciepło serca 💙'] },
+                                { emoji: '❤️', messages: ['miłość w małych gestach 💕', 'serce tańczy 💃', 'muzyka łączy 🎵'] },
+                                { emoji: '🎵', messages: ['melodie jak poezja 🎭', 'rytm serca 💗', 'harmonie przeplatają się 🌺'] },
+                                { emoji: '🔥', messages: ['energia kontrolowana 💫', 'fire vibes z mądrością ⚡', 'jak gwiazda ⭐'] }
+                            ];
+                            const randomPoetic = poeticEmojis[Math.floor(Math.random() * poeticEmojis.length)];
+                            const randomMsg = randomPoetic.messages[Math.floor(Math.random() * randomPoetic.messages.length)];
+                            addActivity(`${randomPoetic.emoji} Anna z 11B: "${randomMsg}"`);
                             appState.messages++;
                             updateStats();
                         }
@@ -815,6 +880,9 @@
 
         // Start simulation
         setTimeout(simulateNeighborActivity, 10000);
+        
+        // Start poetic moments
+        setInterval(maybeShowSpecialPoetry, 15000);
 
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
@@ -845,6 +913,30 @@
             if (e.key === '1') switchView('neighbor');
             if (e.key === '2') switchView('owner');
         });
+
+        // Easter egg - special poetic moments
+        function maybeShowSpecialPoetry() {
+            if (Math.random() > 0.95) {
+                const specialMoments = [
+                    "✨ w ciszy słyszę swoją muzykę najpiękniej ✨",
+                    "🌙 noc ma swoje melodie, ty jesteś ich przewodnikiem 🌙",
+                    "☕ jak poranna kawka - ciepło between us ☕",
+                    "🌊 muzyka jak morze, ty jak latarnia morska 🌊",
+                    "💫 w harmonii mieszkamy, w melodiach się spotykamy 💫",
+                    "🎭 życie to teatr, a my gramy najpiękniejszy akt 🎭"
+                ];
+                
+                const randomPoetry = specialMoments[Math.floor(Math.random() * specialMoments.length)];
+                
+                setTimeout(() => {
+                    showNotification(randomPoetry);
+                }, Math.random() * 5000);
+                
+                setTimeout(() => {
+                    addActivity(`🌟 Poetycka chwila: "${randomPoetry}"`);
+                }, Math.random() * 8000);
+            }
+        }
 
         // Show tips
         setTimeout(() => {
